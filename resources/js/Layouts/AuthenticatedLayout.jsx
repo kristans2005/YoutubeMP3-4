@@ -22,13 +22,27 @@ export default function Authenticated({ user, header, children }) {
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
+                                    dashboard
+                                </NavLink>
+
+                                <NavLink href={route('mp3')} active={route().current('mp3')}>
+                                    download MP3
+                                </NavLink>
+
+                                <NavLink href={route('mp4')} active={route().current('mp4')}>
+                                    download MP4
+                                </NavLink>
+                                
+                                <NavLink href={route('history')} active={route().current('history')}>
+                                    history
                                 </NavLink>
                             </div>
+
+
                         </div>
 
                         <div className="hidden sm:flex sm:items-center sm:ms-6">
-                            <div className="ms-3 relative">
+                                <div className="ms-3 relative">
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <span className="inline-flex rounded-md">
@@ -112,12 +126,12 @@ export default function Authenticated({ user, header, children }) {
                     </div>
                 </div>
             </nav>
-
+{/* 
             {header && (
                 <header className="bg-white dark:bg-gray-800 shadow">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
                 </header>
-            )}
+            )} */}
 
             <main>{children}</main>
         </div>
