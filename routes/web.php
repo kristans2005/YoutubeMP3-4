@@ -21,8 +21,10 @@ Route::get('/dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/mp3', [youtubeController::class, "mp3"])->name('mp3');
+    Route::post('/mp3/save', [youtubeController::class, "mp3ToHistory"])->name("mp3Save");
     Route::get('/mp4', [youtubeController::class, "mp4"])->name('mp4');
     Route::get('/history', [youtubeController::class, "history"])->name('history');
+    
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
@@ -16,11 +17,26 @@ export default function YtMP3({ auth }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setApiErrors(null);
         setError(null);
         setLoading(true);
+    
+        const inputUrl = inputUrlRef.current.value.trim();
+        const youtubeID = youtube_parser(inputUrl);
 
-        const youtubeID = youtube_parser(inputUrlRef.current.value);
+        if (!inputUrl) {
+            setError('Please fill the form.');
+            setLoading(false);
+            return;
+        }
+        
+        if (youtubeID == false ) {
+            setError('Please enter a valid YouTube URL.');
+            setLoading(false);
+            return;
+        }
 
+    
         try {
             const response = await axios.get('https://youtube-mp36.p.rapidapi.com/dl', {
                 headers: {
@@ -33,16 +49,29 @@ export default function YtMP3({ auth }) {
             });
             console.log(response.data);
             setUrlResult(response.data.link);
-            
+            setApiErrors(response.data.error);
             setAudioTitle(response.data.title);
+            
+        if(response.data.msg != "Invalid request" ){
+            console.log("its a valid link :)");
+            const data = {url: inputUrl, title: response.data.title, urlFormat: "mp3"}
+            console.log(data);
+            router.post('/mp3/save', data);
+
+        }
+
         } catch (err) {
             setError('Failed to download MP3. Please try again later.');
             console.error(err);
         }
 
+    
         setLoading(false);
         inputUrlRef.current.value = '';  
+
+        
     };
+    
 
     return (
         <AuthenticatedLayout
@@ -51,12 +80,12 @@ export default function YtMP3({ auth }) {
         >
             <Head title="onichina" />
 
-            <div className='m-4 w-screen h-full grid justify-center content-center text-white'>
-                <div className='bg-slate-800 p-5 rounded-md shadow-2xl shadow-slate-800'>
+            <div className=' w-full h-full grid justify-center content-center text-white'>
+                <div className='bg-slate-800 m-4 mt-[20px] sm:mt-[100px]  p-5 rounded-md shadow-2xl shadow-slate-800'>
                     <div className='border-b-2 pb-2 border-gray-600' >
                         <h1 className='text-bold text-center text-3xl'>YouTube MP3 download</h1>
                     </div>
-                    <form onSubmit={handleSubmit}>
+                    <form method='POST' onSubmit={handleSubmit}>
                         <div className='m-4 flex content-center justify-center flex-col gap-4'>
                             <div>
                                 {urlResult ? (
@@ -65,7 +94,7 @@ export default function YtMP3({ auth }) {
                                             <h1 className='text-bold font-bold text-4xl text-slate-200 ' >{audioTitle}</h1>
                                         </div>
                                         <div>
-                                            <a href={urlResult} className=' text-red-300 underline'>
+                                            <a href={urlResult} className=' text-yellow-200 underline'>
                                                 Click hear to download audio
                                             </a>
                                         </div>
@@ -73,6 +102,7 @@ export default function YtMP3({ auth }) {
                                             <PrimaryButton
                                             className=' bg-slate-700 hover:bg-slate-600 dark:text-white' 
                                             children="convert next audio"
+                                            onClick={() => {setUrlResult(null), setLoading(false)}}
                                             />
                                         </div>
                                     </div>
@@ -80,6 +110,10 @@ export default function YtMP3({ auth }) {
                                 ) : (
                                     <div>
                                     <TextInput ref={inputUrlRef} placeholder="Add YouTube link here" className='dark:border-gray-400 w-full' />
+                                    <div>
+                                        {apiErrors ? <p className='text-red-400'>{apiErrors}</p> : null}
+                                        {error && <p className="text-red-400">{error}</p>}
+                                    </div>
                                     
                                     <PrimaryButton
                                         type="submit"
@@ -91,7 +125,6 @@ export default function YtMP3({ auth }) {
                                     </div>
                                 )}
                             </div>
-                            {error && <p className="text-red-500">{error}</p>}
                         </div>
                     </form>
                 </div>
